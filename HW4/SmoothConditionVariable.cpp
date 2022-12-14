@@ -57,8 +57,8 @@ void * child(void *arg){
             pthread_mutex_unlock(&barrier_mutex);
                 
             if(count == 0){cout<<threadID<<endl;}
-            for(int i = start; i<end; i++){
-		    for(int j =0; j<width ; j++){
+		for(int i = start; i<end; i++){
+			for(int j =0; j<width ; j++){
 
 				int Top   = i>0 ? i-1 : height-1;
 				int Down  = i<height-1 ? i+1 : 0;
@@ -69,7 +69,7 @@ void * child(void *arg){
 	    			BMPSaveData[i][j].rgbGreen =  (double) (BMPData[i][j].rgbGreen+BMPData[Top][j].rgbGreen+BMPData[Top][Left].rgbGreen+BMPData[Top][Right].rgbGreen+BMPData[Down][j].rgbGreen+BMPData[Down][Left].rgbGreen+BMPData[Down][Right].rgbGreen+BMPData[i][Left].rgbGreen+BMPData[i][Right].rgbGreen)/9+0.5;
 		    		BMPSaveData[i][j].rgbRed =  (double) (BMPData[i][j].rgbRed+BMPData[Top][j].rgbRed+BMPData[Top][Left].rgbRed+BMPData[Top][Right].rgbRed+BMPData[Down][j].rgbRed+BMPData[Down][Left].rgbRed+BMPData[Down][Right].rgbRed+BMPData[i][Left].rgbRed+BMPData[i][Right].rgbRed)/9+0.5;
 			}
-            }
+            	}
             //way2
             /*
             for(int i = start; i<end; i++){

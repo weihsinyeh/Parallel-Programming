@@ -37,49 +37,49 @@ typedef struct pass{
         int height;
 }PASS;
 void * child(void *arg){
-        PASS *p = (PASS *)arg;
-        int start = p->start;
-        int end = p->end;
-        int threadID = p->threadID;
-        int width = p->width;
-        int height = p->height;
-        for(int count = 0; count < NSmooth ; count ++){
-            //change data critical section
-            /*Ｂarrier*/
-            sem_wait(&count_sem);
-            if(counter == p->numberOfThread-1){
-                counter = 0;
-                sem_post(&count_sem);
-                for(int i = 0; i < p->numberOfThread-1; i++){
-                    sem_post(&barrier_sem[count%2]);
-                }
+	PASS *p = (PASS *)arg;
+    int start = p->start;
+    int end = p->end;
+    int threadID = p->threadID;
+    int width = p->width;
+    int height = p->height;
+    for(int count = 0; count < NSmooth ; count ++){
+    	//change data critical section
+        /*Ｂarrier*/
+        sem_wait(&count_sem);
+        if(counter == p->numberOfThread-1){
+        	counter = 0;
+            sem_post(&count_sem);
+            for(int i = 0; i < p->numberOfThread-1; i++){
+            	sem_post(&barrier_sem[count%2]);
             }
-            else{
-                counter++;                        
-                sem_post(&count_sem);
-                sem_wait(&barrier_sem[count%2]);
-            }
+        }
+        else{
+            counter++;                        
+            sem_post(&count_sem);
+            sem_wait(&barrier_sem[count%2]);
+        }
                 
-		    for(int i = start; i<end; i++){
-			    for(int j =0; j<width ; j++){
-				    int Top   = i>0 ? i-1 : height-1;
-				    int Down  = i<height-1 ? i+1 : 0;
-				    int Left  = j>0 ? j-1 : width-1;
-				    int Right = j<width-1 ? j+1 : 0;
+		for(int i = start; i<end; i++){
+		  	for(int j =0; j<width ; j++){
+		   		int Top   = i>0 ? i-1 : height-1;
+		   		int Down  = i<height-1 ? i+1 : 0;
+		   		int Left  = j>0 ? j-1 : width-1;
+		   		int Right = j<width-1 ? j+1 : 0;
 	
-    				BMPSaveData[i][j].rgbBlue =  (double) (BMPData[i][j].rgbBlue+BMPData[Top][j].rgbBlue+BMPData[Top][Left].rgbBlue+BMPData[Top][Right].rgbBlue+BMPData[Down][j].rgbBlue+BMPData[Down][Left].rgbBlue+BMPData[Down][Right].rgbBlue+BMPData[i][Left].rgbBlue+BMPData[i][Right].rgbBlue)/9+0.5;
-	    			BMPSaveData[i][j].rgbGreen =  (double) (BMPData[i][j].rgbGreen+BMPData[Top][j].rgbGreen+BMPData[Top][Left].rgbGreen+BMPData[Top][Right].rgbGreen+BMPData[Down][j].rgbGreen+BMPData[Down][Left].rgbGreen+BMPData[Down][Right].rgbGreen+BMPData[i][Left].rgbGreen+BMPData[i][Right].rgbGreen)/9+0.5;
-		    		BMPSaveData[i][j].rgbRed =  (double) (BMPData[i][j].rgbRed+BMPData[Top][j].rgbRed+BMPData[Top][Left].rgbRed+BMPData[Top][Right].rgbRed+BMPData[Down][j].rgbRed+BMPData[Down][Left].rgbRed+BMPData[Down][Right].rgbRed+BMPData[i][Left].rgbRed+BMPData[i][Right].rgbRed)/9+0.5;
-			    }
+    			BMPSaveData[i][j].rgbBlue =  (double) (BMPData[i][j].rgbBlue+BMPData[Top][j].rgbBlue+BMPData[Top][Left].rgbBlue+BMPData[Top][Right].rgbBlue+BMPData[Down][j].rgbBlue+BMPData[Down][Left].rgbBlue+BMPData[Down][Right].rgbBlue+BMPData[i][Left].rgbBlue+BMPData[i][Right].rgbBlue)/9+0.5;
+	    		BMPSaveData[i][j].rgbGreen =  (double) (BMPData[i][j].rgbGreen+BMPData[Top][j].rgbGreen+BMPData[Top][Left].rgbGreen+BMPData[Top][Right].rgbGreen+BMPData[Down][j].rgbGreen+BMPData[Down][Left].rgbGreen+BMPData[Down][Right].rgbGreen+BMPData[i][Left].rgbGreen+BMPData[i][Right].rgbGreen)/9+0.5;
+				BMPSaveData[i][j].rgbRed =  (double) (BMPData[i][j].rgbRed+BMPData[Top][j].rgbRed+BMPData[Top][Left].rgbRed+BMPData[Top][Right].rgbRed+BMPData[Down][j].rgbRed+BMPData[Down][Left].rgbRed+BMPData[Down][Right].rgbRed+BMPData[i][Left].rgbRed+BMPData[i][Right].rgbRed)/9+0.5;
+		   	}
+        }
+        //way2
+        for(int i = start; i<end; i++){
+        	for(int j =0; j<width ; j++){
+            	BMPData[i][j] = BMPSaveData[i][j];
             }
-            //way2
-            for(int i = start; i<end; i++){
-                for(int j =0; j<width ; j++){
-                    BMPData[i][j] = BMPSaveData[i][j];
-                }
-            }                
-	    }
-        pthread_exit(NULL);
+        }                
+	}
+    pthread_exit(NULL);
 }
 int main(int argc,char *argv[])
 {

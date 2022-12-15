@@ -48,7 +48,7 @@ void * child(void *arg){
                 /*Ｂarrier*/
                 sem_wait(&count_sem);
                 if(counter == p->numberOfThread-1){
-                        //way1
+                        /*way1**********************/
                         swap(BMPSaveData, BMPData);
                         counter = 0;
                         sem_post(&count_sem);
@@ -75,14 +75,13 @@ void * child(void *arg){
 				BMPSaveData[i][j].rgbRed =  (double) (BMPData[i][j].rgbRed+BMPData[Top][j].rgbRed+BMPData[Top][Left].rgbRed+BMPData[Top][Right].rgbRed+BMPData[Down][j].rgbRed+BMPData[Down][Left].rgbRed+BMPData[Down][Right].rgbRed+BMPData[i][Left].rgbRed+BMPData[i][Right].rgbRed)/9+0.5;
 			}
                 }
-                //way2
-                /*
+                /**way2********************************* 
                 for(int i = start; i<end; i++){
                         for(int j =0; j<width ; j++){
                                 BMPData[i][j] = BMPSaveData[i][j];
                         }
                 }
-                */
+                **way2*********************************/ 
                 
 	}
         pthread_exit(NULL);
@@ -90,7 +89,7 @@ void * child(void *arg){
 int main(int argc,char *argv[])
 {
 	char *infileName = "input.bmp";
-        char *outfileName = "outputparallel20.bmp";
+        char *outfileName = "resultparallel.bmp";
 	double startwtime = 0.0, endwtime=0;
         struct timespec starttime,endtime;
 
@@ -101,11 +100,13 @@ int main(int argc,char *argv[])
 
         clock_gettime(CLOCK_MONOTONIC, &starttime);
         BMPData = alloc_memory( bmpInfo.biHeight, bmpInfo.biWidth);
+        /**way2*********************************
         for(int i=0;i<bmpInfo.biHeight;i++){
                 for(int j=0;j<bmpInfo.biWidth;j++){
                         BMPData[i][j] = BMPSaveData[i][j];
                 }
         }
+        *way2*********************************/ 
         int nthreads;
         printf("input the number of threads:");
         scanf("%d",&nthreads);

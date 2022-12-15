@@ -41,50 +41,48 @@ void * child(void *arg){
         int width = p->width;
         int height = p->height;
         for(int count = 0; count < NSmooth ; count ++){
-            //change data critical section
-            /*Ｂarrier*/
-            pthread_mutex_lock(&barrier_mutex);
-            counter++;
-            if(counter == p->numberOfThread){
-                //way1
-                swap(BMPSaveData, BMPData);
-                counter = 0;
-                pthread_cond_broadcast(&cond_var);
-            }
-            else{
-                while(pthread_cond_wait(&cond_var, &barrier_mutex) != 0);
-            }
-            pthread_mutex_unlock(&barrier_mutex);
+                //change data critical section
+                /*Ｂarrier*/
+                pthread_mutex_lock(&barrier_mutex);
+                counter++;
+                if(counter == p->numberOfThread){
+                        /*way1**********************/
+                        swap(BMPSaveData, BMPData);
+                        counter = 0;
+                        pthread_cond_broadcast(&cond_var);
+                }
+                else{
+                        while(pthread_cond_wait(&cond_var, &barrier_mutex) != 0);
+                }
+                pthread_mutex_unlock(&barrier_mutex);
                 
-            if(count == 0){cout<<threadID<<endl;}
-			for(int i = start; i<end; i++){
-				for(int j =0; j<width ; j++){
-
-					int Top   = i>0 ? i-1 : height-1;
-					int Down  = i<height-1 ? i+1 : 0;
-					int Left  = j>0 ? j-1 : width-1;
-					int Right = j<width-1 ? j+1 : 0;
+            
+		for(int i = start; i<end; i++){
+			for(int j =0; j<width ; j++){
+	                        int Top   = i>0 ? i-1 : height-1;
+			        int Down  = i<height-1 ? i+1 : 0;
+				int Left  = j>0 ? j-1 : width-1;
+				int Right = j<width-1 ? j+1 : 0;
 	
     				BMPSaveData[i][j].rgbBlue =  (double) (BMPData[i][j].rgbBlue+BMPData[Top][j].rgbBlue+BMPData[Top][Left].rgbBlue+BMPData[Top][Right].rgbBlue+BMPData[Down][j].rgbBlue+BMPData[Down][Left].rgbBlue+BMPData[Down][Right].rgbBlue+BMPData[i][Left].rgbBlue+BMPData[i][Right].rgbBlue)/9+0.5;
 	    			BMPSaveData[i][j].rgbGreen =  (double) (BMPData[i][j].rgbGreen+BMPData[Top][j].rgbGreen+BMPData[Top][Left].rgbGreen+BMPData[Top][Right].rgbGreen+BMPData[Down][j].rgbGreen+BMPData[Down][Left].rgbGreen+BMPData[Down][Right].rgbGreen+BMPData[i][Left].rgbGreen+BMPData[i][Right].rgbGreen)/9+0.5;
 		    		BMPSaveData[i][j].rgbRed =  (double) (BMPData[i][j].rgbRed+BMPData[Top][j].rgbRed+BMPData[Top][Left].rgbRed+BMPData[Top][Right].rgbRed+BMPData[Down][j].rgbRed+BMPData[Down][Left].rgbRed+BMPData[Down][Right].rgbRed+BMPData[i][Left].rgbRed+BMPData[i][Right].rgbRed)/9+0.5;
-				}
-            }
-            //way2
-            /*
-            for(int i = start; i<end; i++){
-                for(int j =0; j<width ; j++){
-                    BMPData[i][j] = BMPSaveData[i][j];
+			}
                 }
-            }
-            */  
-	    }
+                /**way2********************************* 
+                for(int i = start; i<end; i++){
+                        for(int j =0; j<width ; j++){
+                                BMPData[i][j] = BMPSaveData[i][j];
+                        }
+                }
+                **way2*********************************/   
+	}
         pthread_exit(NULL);
 }
 int main(int argc,char *argv[])
 {
 	char *infileName = "input.bmp";
-        char *outfileName = "outputparallel20.bmp";
+        char *outfileName = "resultparallel.bmp";
 	double startwtime = 0.0, endwtime=0;
         struct timespec starttime,endtime;
 
@@ -95,11 +93,13 @@ int main(int argc,char *argv[])
 
         clock_gettime(CLOCK_MONOTONIC, &starttime);
         BMPData = alloc_memory( bmpInfo.biHeight, bmpInfo.biWidth);
+        /**way2****************** ***************
         for(int i=0;i<bmpInfo.biHeight;i++){
                 for(int j=0;j<bmpInfo.biWidth;j++){
                         BMPData[i][j] = BMPSaveData[i][j];
                 }
         }
+        **way2****************** ***************/ 
         int nthreads;
         printf("input the number of threads:");
         scanf("%d",&nthreads);

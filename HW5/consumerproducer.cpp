@@ -1,3 +1,4 @@
+// From https://github.com/RazaRizvii/Operating-System-Semaphore--Producer-and-Consumer-are-part-of-an-application.-The-producer-access-a
 // Including necessary built-in libraries:
 #include <pthread.h>
 #include <semaphore.h>

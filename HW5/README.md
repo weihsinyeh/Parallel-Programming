@@ -9,3 +9,13 @@ reference : https://blog.csdn.net/a19990412/article/details/85162006
 
 亂數生成 : 
 reference : https://andyli.tw/random/
+
+problem5_1 編譯
+
+g++ h5_problem1.cpp -g -Wall -fopenmp -o problem.out
+
+problem5_1 執行
+
+./problem.out
+
+輸入 n 為多少

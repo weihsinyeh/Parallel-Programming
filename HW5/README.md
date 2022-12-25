@@ -19,3 +19,7 @@ problem5_1 執行
 ./problem.out
 
 輸入 n 為多少
+
+copy file to ./HW5
+cp h5_problem1.cpp ./HW5
+

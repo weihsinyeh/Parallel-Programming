@@ -46,7 +46,8 @@ int findBestCity(double **matrixpheromone,int **dist,int src){
   
 }
 int main(int argc, char *argv[]){
-
+    int global_Max_interClonies = INT_MAX;
+    int global_data;
     /**MPI*******************************************/
     int n, myid, numprocs;       /* loop variable (32 bits) */
     int namelen;
@@ -95,8 +96,6 @@ int main(int argc, char *argv[]){
     MPI_Barrier(MPI_COMM_WORLD);  //Wair for the finish of root processor read file
      
     nants = 1;
-    int global_Max_interClonies = INT_MAX;
-    
 
 # pragma omp parallel num_threads(num_threads) shared(global_Max_interClonies)
     {
@@ -217,18 +216,26 @@ int main(int argc, char *argv[]){
         //free(prob); 
     }
     printf("The shortest path is %d %d\n",myid,global_Max_interClonies);
-    /*
-    loc_data.cost = global_Max_interClonies;
-    global_data.cost = global_Max_interClonies;
-    //MPI_Allreduce(&loc_data, &global_data, 1, MPI_INT, MPI_MINLOC,MPI_COMM_WORLD);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    if(myid == 0){
+       int temp = 0;
+       for(int i = 1; i < numprocs;i++){
+            
+           MPI_Recv(&temp     ,1,MPI_INT,i,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+           if(temp < global_Max_interClonies) global_Max_interClonies = temp;
+       }
+     }
+     else{
+       MPI_Send(&global_Max_interClonies, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);  
+     }
 
     if (myid == 0){
-        printf("The shortest path is %d\n",global_data.cost);
-        return 0; /* 0 already has the best tour */
-    //}
+        printf("The shortest path is %d\n",global_Max_interClonies);
+    }
     MPI_Barrier(MPI_COMM_WORLD);
     if(myid == 0)
-    //free(dist);
+        free(dist);
     MPI_Finalize();
     return 0; 
 }

@@ -12,8 +12,10 @@ int cmp(const void * a, const void * b){
 int main(int argc,char **argv){
     srand(time(NULL));
     
-    int i,j,count,n;
-    cin >> n;
+    int i,j,count;
+    int n = atoi(argv[2]);
+    int numberOfThreads = atoi(argv[1]);
+    printf("number of element : %d\nnumber of thread : %d\n",n,numberOfThreads);
     int *a = new int[n];
     int *b = new int[n];
     int *c = new int[n];
@@ -23,7 +25,6 @@ int main(int argc,char **argv){
         a[i] = b[i];
         c[i] = b[i];
     }
-    for(i = 0;i < n;i++) cout << b[i] <<" ";
     clock_t starttime,endtime;
 
     /*** serial-qsort ***/
@@ -48,14 +49,14 @@ int main(int argc,char **argv){
     }
     for(i = 0;i < n;i++)a[i] = temp[i];
     endtime = clock();
-    cout << "Total time serial: " << (double)(endtime - starttime)/CLOCKS_PER_SEC<<endl;
+    cout << "Total time original count sort: " << (double)(endtime - starttime)/CLOCKS_PER_SEC<<endl;
 
     /*** serial ***/
 
     /*** parallel ***/
     
     starttime = clock();
-#pragma omp parallel for private(i,j,count) shared(n,a,temp)
+#pragma omp parallel for num_threads(numberOfThreads) private(i,j,count) shared(n,a,temp)
     for(i = 0;i < n;i++){
         count = 0;
         for(j = 0;j < n;j++){
@@ -67,6 +68,6 @@ int main(int argc,char **argv){
 #pragma omp parallel for
     for(i = 0;i < n;i++)a[i] = temp[i];
     endtime = clock();
-    cout << "Total time parallel: " << (double)(endtime - starttime)/CLOCKS_PER_SEC<<endl;
+    cout << "Total time parallel count sort: " << (double)(endtime - starttime)/CLOCKS_PER_SEC<<endl;
     /*** parallel ***/
 }

@@ -15,7 +15,6 @@ int main(int argc,char **argv){
     int i,j,count;
     int numberOfThreads = atoi(argv[1]); // first parameter is the number of thread
     int n = atoi(argv[2]);               // second parameter is the number of element in array
-    int numberOfThreads = atoi(argv[1]);
     // Print the info
     printf("number of element : %d\nnumber of thread : %d\n",n,numberOfThreads);
     // We use two array. a is the array of random number with range from 0 - 999

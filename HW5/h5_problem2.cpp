@@ -1,16 +1,17 @@
-
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
 #include<string.h>
 #include<omp.h>
-int BUFFER_SIZE;
-int NITER;
-char ** buffer[3000];
-int fill = 0;
-int use = 0;
-char * token[3];    
-int num[3] = {0,0,0};
+int BUFFER_SIZE;      //the number in the buffer
+int NITER;            //the number we need to tokenize in every line producer insert
+char ** buffer[3000]; //the medium of producer and consumer
+int fill = 0;         //the index the producer can input
+int use = 0;          //the index the consumer can consume 
+char * token[3];      //keywors of "hello" "parallel" "programming"
+int num[3] = {0,0,0}; //global number record the frequency of three keywords
+int prorow = 0;       //the number record how many producer produce
+int conrow = 0;       //the number record how many consumer consume
 int buffer_is_empty(){
     return fill == use;
 }
@@ -31,8 +32,6 @@ void producer(char** lines,int line_count,int thread_count){
     while(buffer_is_full());
     insert_item(lines);
 }
-int prorow = 0;
-int conrow = 0;
 void *consumer(){
     char * my_token;
     //When a consumer finds a token that is keyword, the keyword count increases one. Please print each keyword and its count.
@@ -67,15 +66,19 @@ void *consumer(){
 }
 int main(int argc,char * argv[]){
     int row,col,numOfke;
+    //first parameter is the number of threads
     int numberOfThreads = atoi(argv[1]);
+    printf("number of Threads : %d\n",numberOfThreads);
     // Given a keyword file that contains many keywords.
+    //second parameter is the filename
     char *filename = argv[2];
     FILE *fp = fopen(filename,"r");
+    // fist line of the input file is the row and col of 2D array of input keywords
     fscanf(fp,"%d %d \n",&row,&col);
     BUFFER_SIZE = col * 13;
     NITER = col;
     
-    // Keyword
+    // Keyword "hello" "parallel" "programming"
     token[0] = "hello";
     token[1] = "parallel";
     token[2] =  "programming";
@@ -90,13 +93,15 @@ int main(int argc,char * argv[]){
     //some of the threads are producers and others are consumers. 
     
     #pragma omp parallel for num_threads(numberOfThreads) schedule(static,1)
+    //The producers read text from a collection of files, one per producer. 
     for(int i=0;i<row*2;i++){
           int tid = omp_get_thread_num();
           if(i %2 == 0){
-              printf("row = %d",i);
               # pragma omp critical (pro)
               {
-                while(buffer_is_full());
+                while(buffer_is_full()); //thread safe queue
+                //The producers insert lines of text into a single shared queue 
+                //(please implement your own thread safe queue)
                 insert_item(&lines[i/2]);
               }  
           }
@@ -108,17 +113,19 @@ int main(int argc,char * argv[]){
             # pragma omp critical (con)
             {
               while(buffer_is_empty());
+              //The consumers take the lines of text and tokenize them.
               next_consumed = remove_item();
             }
             next = *next_consumed;
-            //printf("%s\n",next);
         
             char * word;
             for(int k=0;k<NITER;k++){
+                //Tokens are “words” separated by white space. 
                 if(k==0)
                     word = strtok_r(next," ",&saveptr);
                 else
                     word = strtok_r(NULL," ",&saveptr);
+                //When a consumer finds a token that is keyword, the keyword count increases one. 
                 if(strcmp(word,token[0])==0){
                     # pragma omp critical(hello)
                     num[0]++;
@@ -134,7 +141,7 @@ int main(int argc,char * argv[]){
             }
         }
     }
-    
+    //Print each keyword and its count.
     for(int i = 0;i < 3;i++){
       printf("frequency of %s : %d\n",token[i],num[i]);
     }

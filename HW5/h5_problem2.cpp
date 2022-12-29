@@ -28,42 +28,6 @@ char** remove_item(){
     return item;
 }
 
-void producer(char** lines,int line_count,int thread_count){
-    while(buffer_is_full());
-    insert_item(lines);
-}
-void *consumer(){
-    char * my_token;
-    //When a consumer finds a token that is keyword, the keyword count increases one. Please print each keyword and its count.
-    char ** next_consumed;
-    char * next;
-    char * saveptr = NULL;
-
-    while(buffer_is_empty());
-        next_consumed = remove_item();
-        next = *next_consumed;
- 
-        char * word;
-        for(int i=0;i<NITER;i++){
-            if(i==0)
-                word = strtok_r(next," ",&saveptr);
-            else
-                word = strtok_r(NULL," ",&saveptr);
-            if(strcmp(word,token[0])==0){
-                # pragma omp critical(hello)
-                num[0]++;
-            }
-            else if(strcmp(word,token[1])==0){
-                # pragma omp critical(parallel)
-                num[1]++;
-            }
-            else if(strcmp(word,token[2])==0){
-                # pragma omp critical(programming)
-                num[2]++;
-            }
-        }
-    
-}
 int main(int argc,char * argv[]){
     int row,col,numOfke;
     //first parameter is the number of threads

@@ -7,10 +7,33 @@
 #include<time.h>
 #include<limits.h>
 #include <mpi.h>
+/*** for gr17_d.txt */
 int alpha = 2;
-int beta = 5;
+int beta =5;
 double rho = 0.8;
 int Q = 2000;
+/*** for gr17_d.txt */
+ 
+/*** for fri26_d.txt
+int alpha = 2;
+int beta =5;
+double rho = 0.8;
+int Q = 2000;
+ *** for fri26_d.txt */
+ 
+/*** for dantzig42_d.txt
+int alpha = 2;
+int beta =4;
+double rho = 0.7;
+int Q = 1000;
+ *** for dantzig42_d.txt */
+ 
+/*** for att48_d.txt
+int alpha = 2;
+int beta =5;
+double rho = 0.8;
+int Q = 40000;
+ *** for att48_d.txt */
 int cities = 0;
 int numberAnt =40;
 int num_threads = 10;
@@ -20,7 +43,7 @@ int free2dint(int ***array);
 double malloc2ddouble(double ***array, int n, int m);
 double free2ddouble(double ***array);
 int main(int argc, char *argv[]){
-    int global_best_between_clonies = INT_MAX;   // the shortest path between colonies
+    int global_best_between_colonies = INT_MAX;   // the shortest path between colonies
     srand(time(NULL));
     char * filename = NULL;
     int **dist = NULL;
@@ -93,7 +116,7 @@ int main(int argc, char *argv[]){
     
     
     /**** Each thread runs a whole ant colony, which will affect the critical section *****/
-# pragma omp parallel num_threads(num_threads) shared(global_best_between_clonies)
+# pragma omp parallel num_threads(num_threads) shared(global_best_between_colonies)
     {
         bool * visit = (bool *)malloc(cities*sizeof(bool ));        // record which city the ant visit
         int  * next  = (int *)malloc(cities*sizeof(int));           // record the next city ant pass 
@@ -195,14 +218,14 @@ int main(int argc, char *argv[]){
                 #pragma omp critical(inter)
                 {
                     // update the global best shortest path between every thread 
-                    if(local_best_in_every_colony < global_best_between_clonies){
-                        global_best_between_clonies = local_best_in_every_colony;
+                    if(local_best_in_every_colony < global_best_between_colonies){
+                        global_best_between_colonies = local_best_in_every_colony;
                     }
                 }
                 #pragma omp barrier
                 // If my local best shortes path is the global shortest path,
                 // then my pheromone matrix is the best
-                if(global_best_between_clonies == local_best_in_every_colony){// 
+                if(global_best_between_colonies == local_best_in_every_colony){// 
                     for(int j = 0;j <cities;j++){
                         for(int k = 0;k <cities;k++){
                             globalpheromone[j][k] = newpheromone[j][k];
@@ -212,7 +235,7 @@ int main(int argc, char *argv[]){
                 #pragma omp barrier
                 // If my local best shortes path is not the global shortest path,
                 // then my pheromone matrix is the best
-                if(global_best_between_clonies != local_best_in_every_colony){
+                if(global_best_between_colonies != local_best_in_every_colony){
                     for(int j = 0;j <cities;j++){
                         for(int k = 0;k <cities;k++){
                             newpheromone[j][k] = globalpheromone[j][k];
@@ -224,13 +247,13 @@ int main(int argc, char *argv[]){
         #pragma omp critical(outer)
         {
             // Last time : update the global best shortest path between every thread 
-            if(local_best_in_every_colony < global_best_between_clonies){
-                global_best_between_clonies = local_best_in_every_colony;
+            if(local_best_in_every_colony < global_best_between_colonies){
+                global_best_between_colonies = local_best_in_every_colony;
             }
         }
     }
     //the shortest path of every core
-    printf("The shortest path of core%d is %d\n",myid,global_best_between_clonies);
+    printf("The shortest path of core%d is %d\n",myid,global_best_between_colonies);
 
     MPI_Barrier(MPI_COMM_WORLD);
     
@@ -238,15 +261,15 @@ int main(int argc, char *argv[]){
        int temp = 0;
        for(int i = 1; i < numprocs;i++){ 
            MPI_Recv(&temp     ,1,MPI_INT,i,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-           if(temp < global_best_between_clonies) global_best_between_clonies = temp;
+           if(temp < global_best_between_colonies) global_best_between_colonies = temp;
        }
     }
     else{
-       MPI_Send(&global_best_between_clonies, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);  
+       MPI_Send(&global_best_between_colonies, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);  
     }
-
+    MPI_Barrier(MPI_COMM_WORLD);
     if (myid == 0){ //Printing the best tour 
-        printf("The shortest path is %d\n",global_best_between_clonies);
+        printf("The shortest path is %d\n",global_best_between_colonies);
     }
     MPI_Barrier(MPI_COMM_WORLD);
     

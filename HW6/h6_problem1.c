@@ -36,6 +36,7 @@ int main(int argc, char *argv[]){
     /****rank = 0 ******************************/
     if(myid == 0){
         filename = argv[1];
+        //determine the number of cities
         if(strcmp(filename,"fri26_d.txt")==0) cities = 26;
         else if(strcmp(filename,"gr17_d.txt")==0) cities = 17;
         else if(strcmp(filename,"dantzig42_d.txt")==0)cities = 42;
